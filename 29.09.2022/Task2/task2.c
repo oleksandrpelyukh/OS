@@ -42,7 +42,6 @@ int main(){
 	if(position < 5){
 		for(i = position+1; i<6;i++){
 			summ= summ+abs(n[i]);
-			printf("Summ %d\n", summ);
 		}
 	}
 	
