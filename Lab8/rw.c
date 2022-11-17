@@ -15,46 +15,37 @@ void *writer(void *wno){
 }
 
 void *reader(void *rno){   
-    // Reader acquire the lock before modifying numreader
     pthread_mutex_lock(&mutex);
     numreader++;
-    if(numreader == 1) {
-        sem_wait(&wrt); // If this id the first reader, then it will block the writer
-    }
+    
+    if(numreader == 1) {sem_wait(&wrt);} 
+    
     pthread_mutex_unlock(&mutex);
-    // Reading Section
     printf("Reader %d: read cnt as %d\n",*((int *)rno),cnt);
 
-    // Reader acquire the lock before modifying numreader
     pthread_mutex_lock(&mutex);
     numreader--;
-    if(numreader == 0) {
-        sem_post(&wrt); // If this is the last reader, it will wake up the writer.
-    }
+    
+    if(numreader == 0) {sem_post(&wrt);} 
+    
     pthread_mutex_unlock(&mutex);
 }
 
 int main(){   
 
-    pthread_t read[3],write[2];
+    pthread_t read[7],write[3];
     pthread_mutex_init(&mutex, NULL);
     sem_init(&wrt,0,1);
 
-    int a[3] = {1,2,3}; //Just used for numbering the producer and consumer
+    int a[7] = {1,2,3,4,5,6,7}; 
 
-    for(int i = 0; i < 3; i++) {
-        pthread_create(&read[i], NULL, (void *)reader, (void *)&a[i]);
-    }
-    for(int i = 0; i < 2; i++) {
-        pthread_create(&write[i], NULL, (void *)writer, (void *)&a[i]);
-    }
+    for(int i = 0; i < 7; i++) {pthread_create(&read[i], NULL, (void *)reader, (void *)&a[i]);}
+    
+    for(int i = 0; i < 3; i++) {pthread_create(&write[i], NULL, (void *)writer, (void *)&a[i]);}
 
-    for(int i = 0; i < 3; i++) {
-        pthread_join(read[i], NULL);
-    }
-    for(int i = 0; i < 2; i++) {
-        pthread_join(write[i], NULL);
-    }
+    for(int i = 0; i < 7; i++) {pthread_join(read[i], NULL);}
+    
+    for(int i = 0; i < 3; i++) {pthread_join(write[i], NULL);}
 
     pthread_mutex_destroy(&mutex);
     sem_destroy(&wrt);
